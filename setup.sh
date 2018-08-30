@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
+if [[ "$BASH_SOURCE" != "$0" ]]; then
+  # This script has been sourced instead of executed
+  echo "Please do not source this file!"
+  return 1
+fi
+
 source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >>/dev/null && pwd )"
-# Load up the ntasklib and initialize it here
-# Sourcing the file implicitly initializes it here
+# Load up the ntasklib and initialize it
+# Sourcing the file implicitly initializes the library
 . "$source_dir/ntasklib.sh"
 
 # This variable is no longer required once the ntasklib is loaded
@@ -84,12 +90,12 @@ configure_hgrc() {
     echo "Not doing .hgrc stuff"
   fi
 }
-task configure_hgrc install_mercurial
+task configure_hgrc
 
 clone_vanguard() {
   :
 }
-task clone_vanguard configure_hgrc create_source_dir
+task clone_vanguard install_mercurial configure_hgrc create_source_dir
 
 install_bins() {
   :
