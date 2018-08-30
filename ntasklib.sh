@@ -151,7 +151,6 @@ ntlib_register_dependency() {
   array=( "${!tmp}" )
 
   while [[ "$#" -gt 0 ]]; do
-    ntlib_task_is_defined "$1"
     ntlib_debug "registering dependency $taskName -> $1"
     array+=("$1")
     shift
@@ -162,7 +161,6 @@ ntlib_register_dependency() {
 
 ntlib_get_dependencies_recursive() {
   ntlib_check_initialized
-  ntlib_task_is_defined "$1"
   local task_list taskName arrayname tmp array subtask list dep
   taskName="$1"
   task_list=()
@@ -228,6 +226,9 @@ run_task() {
   task_list+=("$1")
 
   ntlib_debug "Run list: ${task_list[*]}"
+  for task in "${task_list[@]}"; do
+    ntlib_task_is_defined "$task"
+  done
 
   # Read from FD 10 and write to debug log
   cat <&10 | while read -r output; do
