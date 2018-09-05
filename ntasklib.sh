@@ -46,8 +46,7 @@ ntlib_findin() {
 }
 
 ntlib_initialize() {
-  # TODO: Use mktemp
-  NTLIB_TEMP_DIR="."
+  NTLIB_TEMP_DIR="$(mktemp -dq)"
   NTLIB_LOG_FILE="$NTLIB_TEMP_DIR/dotfile-setup-debug.log"
 
   # Named pipe used to send output from tasks to the debug log
@@ -201,7 +200,7 @@ task() {
   taskName="$1"
   shift
   if [[ "$taskType" != "function" ]]; then
-    error_exit "task($taskName) is not a function"
+    ntlib_error_exit "task($taskName) is not a function"
   fi
   if ! ntlib_findin ntlib_registered_tasks "$taskName"; then
     ntlib_registered_tasks+=("$taskName")
