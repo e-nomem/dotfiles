@@ -49,19 +49,26 @@ ntlib_initialize() {
   NTLIB_TEMP_DIR="$(mktemp -dq)"
   NTLIB_LOG_FILE="$NTLIB_TEMP_DIR/dotfile-setup-debug.log"
 
+  # Track existing variables in the environment so we can clean up any that we create
+  local prop
+  NTLIB_EXISTING_PROPERTIES=()
+  for prop in $((set -o posix; set) | cut -d'=' -f1); do
+    NTLIB_EXISTING_PROPERTIES+=("$prop")
+  done
+
+  unset -f "ntlib_initialize"
+  # Track existing bash functions in the environment so we can clean up any that we create
+  NTLIB_EXISTING_FUNCTIONS=()
+  for prop in $(compgen -A function); do
+    NTLIB_EXISTING_FUNCTIONS+=("$prop")
+  done
+
   # Named pipe used to send output from tasks to the debug log
   # The FD is closed in ntlib_cleanup
   NTLIB_OUTPUT_PIPE="$NTLIB_TEMP_DIR/pipe"
   mkfifo "$NTLIB_OUTPUT_PIPE"
   exec 10<> "$NTLIB_OUTPUT_PIPE"
   rm "$NTLIB_OUTPUT_PIPE"
-
-  # Track existing bash functions in the environment so we can clean up any that we create
-  local func
-  NTLIB_EXISTING_FUNCTIONS=()
-  for func in $(compgen -A function); do
-    NTLIB_EXISTING_FUNCTIONS+=("$func")
-  done
 
   NTLIB_TASK_ARRAY_PREFIX="ntlib_task_dependency__"
   ntlib_registered_tasks=()
@@ -87,22 +94,22 @@ ntlib_cleanup() {
     fi
   done
 
-  for prop in ntlib_findin ntlib_initialize; do
+  for prop in $((set -o posix; set) | cut -d'=' -f1); do
+    if ! ntlib_findin NTLIB_EXISTING_PROPERTIES "$prop"; then
+      ntlib_debug "cleaning up variable $prop"
+    fi
+  done
+
+  for prop in ntlib_findin; do
     ntlib_debug "cleaning up function $prop"
     unset -f "$prop"
   done
-
-  for prop in "${ntlib_registered_tasks[@]}"; do
-    ntlib_debug "cleaning up array $NTLIB_TASK_ARRAY_PREFIX$prop"
-    unset "$NTLIB_TASK_ARRAY_PREFIX$prop"
-  done
-  unset ntlib_registered_tasks
 
   ntlib_debug "cleaning up fd 10"
   exec 10>&-
   exec 10<&-
 
-  for prop in NTLIB_EXISTING_FUNCTIONS NTLIB_TEMP_DIR NTLIB_OUTPUT_PIPE NTLIB_TASK_ARRAY_PREFIX ntlib_registered_tasks; do
+  for prop in NTLIB_EXISTING_PROPERTIES NTLIB_TEMP_DIR; do
     ntlib_debug "cleaning up variable $prop"
     unset "$prop"
   done
