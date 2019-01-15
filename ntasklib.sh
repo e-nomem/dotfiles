@@ -52,7 +52,7 @@ ntlib_initialize() {
   # Track existing variables in the environment so we can clean up any that we create
   local prop
   NTLIB_EXISTING_PROPERTIES=()
-  for prop in $((set -o posix; set) | cut -d'=' -f1); do
+  for prop in $( (set -o posix; set) | cut -d'=' -f1); do
     NTLIB_EXISTING_PROPERTIES+=("$prop")
   done
 
@@ -94,7 +94,7 @@ ntlib_cleanup() {
     fi
   done
 
-  for prop in $((set -o posix; set) | cut -d'=' -f1); do
+  for prop in $( (set -o posix; set) | cut -d'=' -f1); do
     if ! ntlib_findin NTLIB_EXISTING_PROPERTIES "$prop"; then
       ntlib_debug "cleaning up variable $prop"
     fi
