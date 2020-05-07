@@ -21,11 +21,6 @@ bin_exists() {
 
 ## ----- Task Definitions Start Here ----- ##
 
-overwrite_stow_targetdir() {
-  echo "--target=$HOME/" > "$source_dir/stow/.stowrc"
-}
-task overwrite_stow_targetdir
-
 require_osx() {
   if [[ "$(uname)" != "Darwin" ]]; then
     echo "These task definitions only work with OSX!"
@@ -46,81 +41,17 @@ update_homebrew() {
 }
 task update_homebrew install_homebrew
 
-install_gnupg() {
-  if ! bin_exists gpg; then
-    brew install gnupg
-  fi
-}
-task install_gnupg update_homebrew
+. "$source_dir/setup_scripts/setup_stow.sh"
+. "$source_dir/setup_scripts/setup_git.sh"
+. "$source_dir/setup_scripts/setup_gnupg.sh"
+. "$source_dir/setup_scripts/setup_ssh.sh"
 
-install_pinentry() {
-  if ! bin_exists pinentry-mac; then
-    brew install pinentry-mac
-  fi
-}
-task install_pinentry update_homebrew
-
-install_git() {
-  if ! bin_exists git; then
-    brew install git
-  fi
-}
-task install_git update_homebrew
-
-install_stow() {
-  if ! bin_exists stow; then
-    brew install stow
-  fi
-}
-task install_stow update_homebrew
-
-install_bins() {
+stow_all() {
   :
 }
-task install_bins install_git install_gnupg install_pinentry install_stow
-
-stow_stow() {
-  stow -t "$HOME" -d "$source_dir" stow
-}
-task stow_stow install_stow overwrite_stow_targetdir
-
-stow_git() {
-  stow -t "$HOME" -d "$source_dir" git
-}
-task stow_git stow_stow install_git
-
-create_gnupg_dir() {
-  if [[ ! -d "$HOME/.gnupg" ]]; then
-    umask 0077
-    mkdir "$HOME/.gnupg"
-  fi
-}
-task create_gnupg_dir
-
-stow_gnupg() {
-  stow -t "$HOME" -d "$source_dir" gnupg
-}
-task stow_gnupg stow_stow install_gnupg install_pinentry create_gnupg_dir
-
-create_ssh_dir() {
-  if [[ ! -d "$HOME/.ssh" ]]; then
-    umask 0077
-    mkdir "$HOME/.ssh"
-  fi
-}
-task create_ssh_dir
-
-stow_ssh() {
-  stow -t "$HOME" -d "$source_dir" ssh
-}
-task stow_ssh create_ssh_dir
-
-phony_all() {
-  :
-}
-task phony_all install_bins stow_stow stow_git stow_gnupg stow_ssh
+task stow_all stow_stow stow_gnupg stow_ssh stow_git
 
 ## ----- Task Definitions End Here ----- ##
 
 # Go do the things
-run_task phony_all
+run_task stow_all
