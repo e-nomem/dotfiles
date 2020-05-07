@@ -77,7 +77,12 @@ stow_stow() {
 }
 task stow_stow install_stow overwrite_stow_targetdir
 
+phony_all() {
+  :
+}
+task phony_all install_bins stow_stow
+
 ## ----- Task Definitions End Here ----- ##
 
 # Go do the things
-run_task install_bins stow_stow
+run_task phony_all
