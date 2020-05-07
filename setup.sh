@@ -102,10 +102,23 @@ stow_gnupg() {
 }
 task stow_gnupg stow_stow install_gnupg install_pinentry create_gnupg_dir
 
+create_ssh_dir() {
+  if [[ ! -d "$HOME/.ssh" ]]; then
+    umask 0077
+    mkdir "$HOME/.ssh"
+  fi
+}
+task create_ssh_dir
+
+stow_ssh() {
+  stow -t "$HOME" -d "$source_dir" ssh
+}
+task stow_ssh create_ssh_dir
+
 phony_all() {
   :
 }
-task phony_all install_bins stow_stow stow_git stow_gnupg
+task phony_all install_bins stow_stow stow_git stow_gnupg stow_ssh
 
 ## ----- Task Definitions End Here ----- ##
 
