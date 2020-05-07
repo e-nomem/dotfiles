@@ -53,6 +53,13 @@ install_gnupg() {
 }
 task install_gnupg update_homebrew
 
+install_pinentry() {
+  if ! bin_exists pinentry-mac; then
+    brew install pinentry-mac
+  fi
+}
+task install_pinentry update_homebrew
+
 install_git() {
   if ! bin_exists git; then
     brew install git
@@ -70,7 +77,7 @@ task install_stow update_homebrew
 install_bins() {
   :
 }
-task install_bins install_git install_gnupg install_stow
+task install_bins install_git install_gnupg install_pinentry install_stow
 
 stow_stow() {
   stow -t "$HOME" -d "$source_dir" stow
@@ -82,10 +89,23 @@ stow_git() {
 }
 task stow_git stow_stow install_git
 
+create_gnupg_dir() {
+  if [[ ! -d "$HOME/.gnupg" ]]; then
+    umask 0077
+    mkdir "$HOME/.gnupg"
+  fi
+}
+task create_gnupg_dir
+
+stow_gnupg() {
+  stow -t "$HOME" -d "$source_dir" gnupg
+}
+task stow_gnupg stow_stow install_gnupg install_pinentry create_gnupg_dir
+
 phony_all() {
   :
 }
-task phony_all install_bins stow_stow stow_git
+task phony_all install_bins stow_stow stow_git stow_gnupg
 
 ## ----- Task Definitions End Here ----- ##
 
