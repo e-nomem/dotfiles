@@ -24,6 +24,8 @@ tlib_findin() {
 tlib_initialize() {
   TLIB_TEMP_DIR="$(mktemp -dq)"
   TLIB_LOG_FILE="$TLIB_TEMP_DIR/tasklib.log"
+  TLIB_DOT_FILE="$TLIB_TEMP_DIR/tasks.dot"
+  echo "digraph tasks {" > "$TLIB_DOT_FILE"
   TLIB_OUTPUT_PIPE="$TLIB_TEMP_DIR/pipe"
   mkfifo "$TLIB_OUTPUT_PIPE"
   exec 10<> "$TLIB_OUTPUT_PIPE"
@@ -42,6 +44,8 @@ tlib_cleanup() {
   tlib_debug "cleaning up fd 10"
   exec 10>&-
   exec 10<&-
+  echo "}" >> "$TLIB_DOT_FILE"
+  echo "Dot file written to $TLIB_DOT_FILE"
   echo "Debug log written to $TLIB_LOG_FILE"
 }
 
@@ -87,6 +91,7 @@ tlib_register_dependency() {
 
   while [[ "$#" -gt 0 ]]; do
     tlib_debug "registering depdency $taskName -> $1"
+    echo -e "\\t$taskName -> $1;" >> "$TLIB_DOT_FILE"
     array+=("$1")
     shift
   done
