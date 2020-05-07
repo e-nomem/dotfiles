@@ -163,19 +163,19 @@ run_task() {
     tlib_debug "processing task $task"
     if $has_errored; then
       tlib_debug "skipping task $task"
-      echo -e "TASK: $task\\t\\t\\t[SKIPPED]"
+      echo -e "TASK: $task\\r\\t\\t\\t\\t\\t[SKIPPED]"
     else
-      echo -ne "TASK: $task\\t\\t\\t[RUNNING]"
+      echo -ne "TASK: $task\\r\\t\\t\\t\\t\\t[RUNNING]"
       $task >&10 2>&1 < /dev/null
       ret=$?
       tput el1
       if [[ "$ret" -ne 0 ]]; then
         tlib_debug "task status $task: error"
-        echo -e "\\rTASK: $task\\t\\t\\t[ERROR]"
+        echo -e "\\rTASK: $task\\r\\t\\t\\t\\t\\t[ERROR]"
         has_errored=true
       else
         tlib_debug "task status $task: success"
-        echo -e "\\rTASK: $task\\t\\t\\t[DONE]"
+        echo -e "\\rTASK: $task\\r\\t\\t\\t\\t\\t[DONE]"
       fi
     fi
   done
