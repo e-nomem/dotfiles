@@ -11,9 +11,6 @@ source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >>/dev/null && pwd )"
 # Sourcing the file implicitly initializes the library
 . "$source_dir/tasklib.sh"
 
-# This variable is no longer required once the tasklib is loaded
-unset "source_dir"
-
 # Ensure that we trap the EXIT signal to clean up all the tasklib stuff
 trap tlib_cleanup EXIT
 
@@ -23,6 +20,11 @@ bin_exists() {
 }
 
 ## ----- Task Definitions Start Here ----- ##
+
+overwrite_stow_targetdir() {
+  echo "--target=$HOME/" > "$source_dir/stow/.stowrc"
+}
+task overwrite_stow_targetdir
 
 require_osx() {
   if [[ "$(uname)" != "Darwin" ]]; then
@@ -70,7 +72,12 @@ install_bins() {
 }
 task install_bins install_git install_gnupg install_stow
 
+stow_stow() {
+  stow -t "$HOME" -d "$source_dir" stow
+}
+task stow_stow install_stow overwrite_stow_targetdir
+
 ## ----- Task Definitions End Here ----- ##
 
 # Go do the things
-run_task install_bins
+run_task install_bins stow_stow
