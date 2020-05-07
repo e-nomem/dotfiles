@@ -77,10 +77,15 @@ stow_stow() {
 }
 task stow_stow install_stow overwrite_stow_targetdir
 
+stow_git() {
+  stow -t "$HOME" -d "$source_dir" git
+}
+task stow_git stow_stow install_git
+
 phony_all() {
   :
 }
-task phony_all install_bins stow_stow
+task phony_all install_bins stow_stow stow_git
 
 ## ----- Task Definitions End Here ----- ##
 

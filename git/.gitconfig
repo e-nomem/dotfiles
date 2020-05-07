@@ -1,0 +1,13 @@
+[user]
+	name = Eashwar Ranganathan
+	email = eashwar@eashwar.com
+	# Primary Key
+	signingkey = ABE7DE99109E0751!
+	# Secondary Key
+	# signingkey = 16D3DAA87DD14FD1!
+	# Tertiary Key
+	# signingkey = 9CC032321B7646AB!
+	# Quaternary Key
+	# signingkey = 41110033AEA8A6AF!
+[commit]
+	gpgsign = true
