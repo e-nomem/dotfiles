@@ -6,7 +6,7 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
   return 1
 fi
 
-source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >>/dev/null && pwd )"
+source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >>/dev/null && pwd)"
 # Load up the tasklib and initialize it
 # Sourcing the file implicitly initializes the library
 . "$source_dir/tasklib.sh"
@@ -21,26 +21,7 @@ bin_exists() {
 
 ## ----- Task Definitions Start Here ----- ##
 
-require_osx() {
-  if [[ "$(uname)" != "Darwin" ]]; then
-    echo "These task definitions only work with OSX!"
-    return 1
-  fi
-}
-task require_osx
-
-install_homebrew() {
-  if ! bin_exists brew; then
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null
-  fi
-}
-task install_homebrew require_osx
-
-update_homebrew() {
-  brew update
-}
-task update_homebrew install_homebrew
-
+. "$source_dir/setup_scripts/setup_osx.sh"
 . "$source_dir/setup_scripts/setup_stow.sh"
 . "$source_dir/setup_scripts/setup_git.sh"
 . "$source_dir/setup_scripts/setup_gnupg.sh"
