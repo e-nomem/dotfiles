@@ -11,9 +11,6 @@ source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >>/dev/null && pwd)"
 # Sourcing the file implicitly initializes the library
 . "$source_dir/tasklib.sh"
 
-# Ensure that we trap the EXIT signal to clean up all the tasklib stuff
-trap tlib_cleanup EXIT
-
 # Utility function to find an executable in the path
 bin_exists() {
   hash "$1" 2>/dev/null

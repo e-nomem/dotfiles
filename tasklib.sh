@@ -24,15 +24,48 @@ tlib_findin() {
   return 1
 }
 
+tlib_cleanup() {
+  local idx taskName taskType ret
+  for (( idx=${#TLIB_CLEANUP_HOOKS[@]}-1 ; idx >= 0 ; idx-- )) ; do
+    taskName="${TLIB_CLEANUP_HOOKS[idx]}"
+    taskType="$(type -t $taskName)"
+    tlib_debug "Running cleanup task: $taskName"
+    if [[ "$taskType" != "function" ]]; then
+      tlib_debug "$taskName is not a function... skipping"
+    else
+      $taskName >&10 2>&1 < /dev/null
+      ret=$?
+      tlib_debug "$taskName completed with return code $ret"
+    fi
+  done
+
+  # Close up the log fd at the end
+  # Otherwise we cannot use tlib_debug above
+  tlib_debug "cleaning up fd 10"
+  exec 10<&-
+
+  # Explicit user-facing messages here
+  echo "Dot file written to $TLIB_DOT_FILE"
+  echo "Debug log written to $TLIB_LOG_FILE"
+}
+
 tlib_initialize() {
   TLIB_TEMP_DIR="$(mktemp -dq)"
   TLIB_LOG_FILE="$TLIB_TEMP_DIR/tasklib.log"
-  TLIB_DOT_FILE="$TLIB_TEMP_DIR/tasks.dot"
-  echo "digraph tasks {" > "$TLIB_DOT_FILE"
+  TLIB_CLEANUP_HOOKS=()
+
+  # Set up the log pipe
   TLIB_OUTPUT_PIPE="$TLIB_TEMP_DIR/pipe"
   mkfifo "$TLIB_OUTPUT_PIPE"
   exec 10<> "$TLIB_OUTPUT_PIPE"
   rm "$TLIB_OUTPUT_PIPE"
+
+  # Set up the cleanup hooks to run on exit
+  trap tlib_cleanup EXIT
+
+  # Initialize components and their cleanup hooks
+  tlib_initialize_log_writer
+  tlib_initialize_dot_file
 
   TLIB_TASK_ARRAY_PREFIX="tlib_task_dependency__"
   tlib_registered_tasks=()
@@ -43,12 +76,31 @@ tlib_initialize() {
   tlib_debug "using fd 10 for log $TLIB_LOG_FILE"
 }
 
-tlib_cleanup() {
-  echo "}" >> "$TLIB_DOT_FILE"
-  tlib_debug "cleaning up fd 10"
-  exec 10<&-
-  echo "Dot file written to $TLIB_DOT_FILE"
-  echo "Debug log written to $TLIB_LOG_FILE"
+tlib_initialize_log_writer() {
+  # Read from FD 10 and write to debug log
+  (cat <&10 | while read -r output; do
+    tlib_debug "task output: $output"
+  done) &
+  TLIB_BG_PGID="$!"
+  tlib_debug "Log writer initialized with pgid $TLIB_BG_PGID"
+
+  tlib_cleanup_log_writer() {
+    tlib_debug "Killing log writer pgid $TLIB_BG_PGID"
+    kill -- -$TLIB_BG_PGID
+  }
+
+  TLIB_CLEANUP_HOOKS+=(tlib_cleanup_log_writer)
+}
+
+tlib_initialize_dot_file() {
+  TLIB_DOT_FILE="$TLIB_TEMP_DIR/tasks.dot"
+  echo "digraph tasks {" > "$TLIB_DOT_FILE"
+
+  tlib_finalize_dot_file() {
+    echo "}" >> "$TLIB_DOT_FILE"
+  }
+
+  TLIB_CLEANUP_HOOKS+=(tlib_finalize_dot_file)
 }
 
 tlib_error_exit() {
@@ -159,12 +211,6 @@ run_task() {
     tlib_assert_task_is_defined "$task"
   done
 
-  # Read from FD 10 and write to debug log
-  (cat <&10 | while read -r output; do
-    tlib_debug "task output: $output"
-  done) &
-  bgPid="$!"
-
   has_errored=false
   for task in "${task_list[@]}"; do
     tlib_debug "processing task $task"
@@ -186,9 +232,6 @@ run_task() {
       fi
     fi
   done
-
-  tlib_debug "killing background task group $bgPid"
-  kill -- -$bgPid
 }
 
 tlib_initialize
