@@ -248,6 +248,20 @@ task() {
   tlib_register_dependency "$taskName" "$@"
 }
 
+phony() {
+  local taskName taskType
+  taskName="$1"
+  shift
+  taskType="$(type -t $taskName)"
+  [[ -n "$taskType" ]] && tlib_error_exit "task($taskName) is already defined as $taskType... cannot override"
+  . /dev/stdin <<EOF
+$taskName() {
+  :
+}
+EOF
+  task $taskName "$@"
+}
+
 run_task() {
   tlib_assert_task_is_defined "$1"
   local task_list task output bgPid has_errored ret

@@ -24,10 +24,7 @@ bin_exists() {
 . "$source_dir/setup_scripts/setup_gnupg.sh"
 . "$source_dir/setup_scripts/setup_ssh.sh"
 
-stow_all() {
-  :
-}
-task stow_all stow_stow stow_gnupg stow_ssh stow_git
+phony stow_all stow_stow stow_gnupg stow_ssh stow_git
 
 ## ----- Task Definitions End Here ----- ##
 
