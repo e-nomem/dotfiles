@@ -45,6 +45,10 @@
 # In an emergency, the 'tlib_error_exit' method is available as well. This method
 # will print the provided message to both the user and the debug log along with a
 # stack trace, and kill the process by calling exit 1
+#
+# Circular Dependencies:
+# Circular dependencies are not detected by this library, and will not cause an error,
+# and the execution order of the tasks are not guaranteed to be correct.
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   # This script has been executed instead of sourced
