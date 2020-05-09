@@ -1,13 +1,59 @@
 #!/usr/bin/env bash
 
-# Enable job control (required for background process handling in run_task)
-set -m
+# Usage:
+# Sourcing this file implicitly initializes the library
+#
+# Tasks:
+# This library is used to order execution of 'tasks', where each task
+# is a simple bash function. **Tasks must be idempotent**
+# Tasks can depend on the completion of other tasks.
+# Given a bash function 'bar' that needs to run after function 'foo', they
+# can be registered as:
+# task foo
+# task bar foo
+# task <function_name> <dep_0> <dep_1> ... <dep_n>
+#
+# Task environment:
+# Tasks share the same environment as the setup script that invokes them
+# Furthermore, any output to stdout or stderr is redirected to the debug log, and
+# stdin is redirected from /dev/null.
+#
+# Running Tasks:
+# A defined task can be run by using the 'run_task' function. The 'run_task'
+# function will only accept a single task at a time, but can be invoked multiple
+# times. Any task that returns a non-zero exit status will be marked as failed
+# and all subsequent tasks will be skipped.
+#
+# Bash Traps:
+# This library takes over the EXIT signal trap to run 'tlib_cleanup'
+# You are free to override this, but in that case, it is your responsibility to
+# ensure 'tlib_cleanup' is run in any possible exit condition. Zombie
+# processes will be left beind if this does not happen
+#
+# If you would like to run a custom cleanup function, your function can be inserted
+# into the array TLIB_CLEANUP_HOOKS. These functions are run in reverse order from
+# within the 'tlib_cleanup' function
+#
+# Debug Logging:
+# After this library is sourced/initialized, the 'tlib_debug' method is available
+# until 'tlib_cleanup' is run. It accepts a string and writes it directly into
+# the debug log
+#
+# Aborting:
+# The tasks are run in the same process as the one that invokes 'run_task'. Any
+# task can abort and cancel the remaining tasks by returning a non-zero exit code.
+# In an emergency, the 'tlib_error_exit' method is available as well. This method
+# will print the provided message to both the user and the debug log along with a
+# stack trace, and kill the process by calling exit 1
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   # This script has been executed instead of sourced
   echo "Please source this file!" >&2
   exit 1
 fi
+
+# Enable job control (required for background process handling in log writer)
+set -m
 
 tlib_debug() {
   echo "DEBUG: $*" >> "$TLIB_LOG_FILE"
