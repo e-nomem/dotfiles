@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Enable job control (required for background process handling in run_task)
+set -m
+
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   # This script has been executed instead of sourced
   echo "Please source this file!" >&2
@@ -41,10 +44,9 @@ tlib_initialize() {
 }
 
 tlib_cleanup() {
-  tlib_debug "cleaning up fd 10"
-  exec 10>&-
-  exec 10<&-
   echo "}" >> "$TLIB_DOT_FILE"
+  tlib_debug "cleaning up fd 10"
+  exec 10<&-
   echo "Dot file written to $TLIB_DOT_FILE"
   echo "Debug log written to $TLIB_LOG_FILE"
 }
@@ -158,9 +160,9 @@ run_task() {
   done
 
   # Read from FD 10 and write to debug log
-  cat <&10 | while read -r output; do
+  (cat <&10 | while read -r output; do
     tlib_debug "task output: $output"
-  done &
+  done) &
   bgPid="$!"
 
   has_errored=false
@@ -175,7 +177,7 @@ run_task() {
       ret=$?
       tput el1
       if [[ "$ret" -ne 0 ]]; then
-        tlib_debug "task status $task: error"
+        tlib_debug "task status $task: error($ret)"
         echo -e "\\rTASK: $task\\r\\t\\t\\t\\t\\t[ERROR]"
         has_errored=true
       else
@@ -185,8 +187,8 @@ run_task() {
     fi
   done
 
-  tlib_debug "killing background task $bgPid"
-  kill $bgPid
+  tlib_debug "killing background task group $bgPid"
+  kill -- -$bgPid
 }
 
 tlib_initialize
