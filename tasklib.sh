@@ -59,6 +59,8 @@ fi
 # Enable job control (required for background process handling in log writer)
 set -m
 
+TLIB_CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >>/dev/null && pwd)"
+
 tlib_debug() {
   echo "DEBUG: $*" >> "$TLIB_LOG_FILE"
 }
@@ -264,7 +266,7 @@ EOF
 
 run_task() {
   tlib_assert_task_is_defined "$1"
-  local task_list task output bgPid has_errored ret
+  local task_list task output bgPid has_errored ret dirstackdepth
 
   # shellcheck disable=SC2207
   task_list=( $(tlib_get_dependencies_recursive "$1") )
@@ -282,9 +284,18 @@ run_task() {
       tlib_debug "skipping task $task"
       echo -e "TASK: $task\\r\\t\\t\\t\\t\\t[SKIPPED]"
     else
+      tlib_debug "Changing workdir to $TLIB_CURRENT_DIR"
+      pushd "$TLIB_CURRENT_DIR" > /dev/null
+      dirstackdepth="${#DIRSTACK[@]}"
       echo -ne "TASK: $task\\r\\t\\t\\t\\t\\t[RUNNING]"
       $task >&10 2>&1 < /dev/null
       ret=$?
+      if [[ "${#DIRSTACK[@]}" -gt "$dirstackdepth" ]]; then
+        tlib_debug "Directory stack depth mismatch: Expected $dirstackdepth, Actual ${#DIRSTACK[@]}"
+      fi
+      while [[ "${#DIRSTACK[@]}" -ge "$dirstackdepth" ]]; do
+        popd > /dev/null
+      done
       tput el1
       if [[ "$ret" -ne 0 ]]; then
         tlib_debug "task status $task: error($ret)"
