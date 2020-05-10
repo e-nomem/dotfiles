@@ -78,6 +78,12 @@ tlib_findin() {
 
 tlib_cleanup() {
   local idx taskName taskType ret
+  # Save stdout/stderr and modify it to write to the log and the user
+  exec 11>&1
+  exec 12>&2
+  exec 1> >(tee -a >(awk '{print "DEBUG: stdout: "$0; fflush()}' >> "$TLIB_LOG_FILE"))
+  exec 2> >(tee -a >(awk '{print "DEBUG: stderr: "$0; fflush()}' >> "$TLIB_LOG_FILE") >&12)
+
   for (( idx=${#TLIB_CLEANUP_HOOKS[@]}-1 ; idx >= 0 ; idx-- )) ; do
     taskName="${TLIB_CLEANUP_HOOKS[idx]}"
     taskType="$(type -t $taskName)"
@@ -85,19 +91,19 @@ tlib_cleanup() {
     if [[ "$taskType" != "function" ]]; then
       tlib_debug "$taskName is not a function... skipping"
     else
-      $taskName >&10 2>&1 < /dev/null
+      $taskName < /dev/null
       ret=$?
       tlib_debug "$taskName completed with return code $ret"
     fi
   done
 
-  # Close up the log fd at the end
-  # Otherwise we cannot use tlib_debug above
-  tlib_debug "cleaning up fd 10"
-  exec 10<&-
+  # Restore file descriptors
+  exec 1>&11
+  exec 2>&12
+  exec 11<&-
+  exec 12<&-
 
   # Explicit user-facing messages here
-  echo "Dot file written to $TLIB_DOT_FILE"
   echo "Debug log written to $TLIB_LOG_FILE"
 }
 
@@ -105,12 +111,6 @@ tlib_initialize() {
   TLIB_TEMP_DIR="$(mktemp -dq)"
   TLIB_LOG_FILE="$TLIB_TEMP_DIR/tasklib.log"
   TLIB_CLEANUP_HOOKS=()
-
-  # Set up the log pipe
-  TLIB_OUTPUT_PIPE="$TLIB_TEMP_DIR/pipe"
-  mkfifo "$TLIB_OUTPUT_PIPE"
-  exec 10<> "$TLIB_OUTPUT_PIPE"
-  rm "$TLIB_OUTPUT_PIPE"
 
   # Set up the cleanup hooks to run on exit
   trap tlib_cleanup EXIT
@@ -129,6 +129,13 @@ tlib_initialize() {
 }
 
 tlib_initialize_log_writer() {
+  local output_pipe
+  # Set up the log pipe
+  output_pipe="$TLIB_TEMP_DIR/pipe"
+  mkfifo "$output_pipe"
+  exec 10<> "$output_pipe"
+  rm "$output_pipe"
+
   # Read from FD 10 and write to debug log
   (cat <&10 | while read -r output; do
     tlib_debug "task output: $output"
@@ -139,6 +146,8 @@ tlib_initialize_log_writer() {
   tlib_cleanup_log_writer() {
     tlib_debug "Killing log writer pgid $TLIB_BG_PGID"
     kill -- -$TLIB_BG_PGID
+    tlib_debug "Closing fd 10"
+    exec 10<&-
   }
 
   TLIB_CLEANUP_HOOKS+=(tlib_cleanup_log_writer)
@@ -150,6 +159,7 @@ tlib_initialize_dot_file() {
 
   tlib_finalize_dot_file() {
     echo "}" >> "$TLIB_DOT_FILE"
+    echo "Dot file written to $TLIB_DOT_FILE"
   }
 
   TLIB_CLEANUP_HOOKS+=(tlib_finalize_dot_file)
