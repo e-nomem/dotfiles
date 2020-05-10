@@ -79,6 +79,9 @@ tlib_findin() {
 tlib_cleanup() {
   local idx taskName taskType ret
   # Save stdout/stderr and modify it to write to the log and the user
+  # Because this is asynchronous to the cleanup task execution output
+  # for the previous cleanup task will likely be logged after the next
+  # cleanup task has started
   exec 11>&1
   exec 12>&2
   exec 1> >(tee -a >(awk '{print "DEBUG: stdout: "$0; fflush()}' >> "$TLIB_LOG_FILE"))
@@ -115,6 +118,8 @@ tlib_initialize() {
   # Set up the cleanup hooks to run on exit
   trap tlib_cleanup EXIT
 
+  tlib_debug "===== New Execution ($(date)) ====="
+
   # Initialize components and their cleanup hooks
   tlib_initialize_log_writer
   tlib_initialize_dot_file
@@ -123,9 +128,6 @@ tlib_initialize() {
   tlib_registered_tasks=()
 
   unset -f "tlib_initialize"
-
-  tlib_debug "===== New Execution ($(date)) ====="
-  tlib_debug "using fd 10 for log $TLIB_LOG_FILE"
 }
 
 tlib_initialize_log_writer() {
@@ -135,6 +137,7 @@ tlib_initialize_log_writer() {
   mkfifo "$output_pipe"
   exec 10<> "$output_pipe"
   rm "$output_pipe"
+  tlib_debug "Using fd 10 for log $TLIB_LOG_FILE"
 
   # Read from FD 10 and write to debug log
   (cat <&10 | while read -r output; do
