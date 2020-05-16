@@ -17,4 +17,4 @@ task create_ssh_dir
 stow_ssh() {
   stow -t "$HOME" -d "$source_dir" ssh
 }
-task stow_ssh create_ssh_dir
+task stow_ssh install_brewfile create_ssh_dir

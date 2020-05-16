@@ -13,15 +13,3 @@ require_osx() {
   fi
 }
 task require_osx
-
-install_homebrew() {
-  if ! bin_exists brew; then
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null
-  fi
-}
-task install_homebrew require_osx
-
-update_homebrew() {
-  brew update
-}
-task update_homebrew install_homebrew

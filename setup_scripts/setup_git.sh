@@ -6,14 +6,7 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   exit 1
 fi
 
-install_git() {
-  if ! bin_exists git; then
-    brew install git
-  fi
-}
-task install_git update_homebrew
-
 stow_git() {
   stow -t "$HOME" -d "$source_dir" git
 }
-task stow_git install_git
+task stow_git install_brewfile

@@ -19,12 +19,13 @@ bin_exists() {
 ## ----- Task Definitions Start Here ----- ##
 
 . "$source_dir/setup_scripts/setup_osx.sh"
+. "$source_dir/setup_scripts/setup_homebrew.sh"
 . "$source_dir/setup_scripts/setup_stow.sh"
 . "$source_dir/setup_scripts/setup_git.sh"
 . "$source_dir/setup_scripts/setup_gnupg.sh"
 . "$source_dir/setup_scripts/setup_ssh.sh"
 
-phony stow_all stow_stow stow_gnupg stow_ssh stow_git
+phony stow_all stow_stow stow_gnupg stow_ssh stow_git stow_homebrew
 
 ## ----- Task Definitions End Here ----- ##
 

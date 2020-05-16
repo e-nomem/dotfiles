@@ -6,20 +6,6 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   exit 1
 fi
 
-install_gnupg() {
-  if ! bin_exists gpgconf; then
-    brew install gnupg
-  fi
-}
-task install_gnupg update_homebrew
-
-install_pinentry() {
-  if ! bin_exists pinentry-mac; then
-    brew install pinentry-mac
-  fi
-}
-task install_pinentry update_homebrew
-
 create_gnupg_dir() {
   if [[ ! -d "$HOME/.gnupg" ]]; then
     umask 0077
@@ -31,4 +17,4 @@ task create_gnupg_dir
 stow_gnupg() {
   stow -t "$HOME" -d "$source_dir" gnupg
 }
-task stow_gnupg install_gnupg install_pinentry create_gnupg_dir
+task stow_gnupg install_brewfile create_gnupg_dir
