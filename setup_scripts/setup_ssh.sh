@@ -8,8 +8,9 @@ fi
 
 create_ssh_dir() {
   if [[ ! -d "$HOME/.ssh" ]]; then
-    umask 0077
-    mkdir "$HOME/.ssh"
+    # umask ensures proper permissions are set for the ~/.ssh directory
+    # It is run in a subshell to ensure that the global umask is not modified
+    (umask 0077 && mkdir "$HOME/.ssh")
   fi
 }
 task create_ssh_dir

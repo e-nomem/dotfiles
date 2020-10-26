@@ -8,8 +8,9 @@ fi
 
 create_gnupg_dir() {
   if [[ ! -d "$HOME/.gnupg" ]]; then
-    umask 0077
-    mkdir "$HOME/.gnupg"
+    # umask ensures proper permissions are set for the ~/.gnupg directory
+    # It is run in a subshell to ensure that the global umask is not modified
+    (umask 0077 && mkdir "$HOME/.gnupg")
   fi
 }
 task create_gnupg_dir
