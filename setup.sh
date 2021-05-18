@@ -25,10 +25,12 @@ bin_exists() {
 . "$source_dir/setup_scripts/setup_gnupg.sh"
 . "$source_dir/setup_scripts/setup_ssh.sh"
 . "$source_dir/setup_scripts/setup_fish.sh"
+. "$source_dir/setup_scripts/setup_rust.sh"
 
 phony stow_all stow_stow stow_gnupg stow_ssh stow_git stow_homebrew stow_fish
+phony all stow_all rust_all
 
 ## ----- Task Definitions End Here ----- ##
 
 # Go do the things
-run_task stow_all
+run_task all
