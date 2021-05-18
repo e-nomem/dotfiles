@@ -123,6 +123,7 @@ tlib_initialize() {
   # Initialize components and their cleanup hooks
   tlib_initialize_log_writer
   tlib_initialize_dot_file
+  tlib_debug "Using workdir $TLIB_CURRENT_DIR"
 
   TLIB_TASK_ARRAY_PREFIX="tlib_task_dependency__"
   tlib_registered_tasks=()
@@ -199,14 +200,13 @@ tlib_get_dependency_array_name() {
 }
 
 tlib_register_dependency() {
-  local taskName arrayname tmp array
+  local taskName arrayname array
   taskName="$1"
   shift
   tlib_assert_task_is_defined "$taskName"
 
-  arrayname="$(tlib_get_dependency_array_name "$taskName")"
-  tmp="$arrayname[@]"
-  array=( "${!tmp}" )
+  arrayname="$(tlib_get_dependency_array_name "$taskName")[@]"
+  array=( "${!arrayname}" )
 
   while [[ "$#" -gt 0 ]]; do
     tlib_debug "registering depdency $taskName -> $1"
@@ -219,12 +219,11 @@ tlib_register_dependency() {
 }
 
 tlib_get_dependencies_recursive() {
-  local taskName task_list arrayname tmp array subtask list dep
+  local taskName task_list arrayname array subtask list dep
   taskName="$1"
   task_list=()
-  arrayname="$(tlib_get_dependency_array_name "$taskName")"
-  tmp="$arrayname[@]"
-  array=( "${!tmp}" )
+  arrayname="$(tlib_get_dependency_array_name "$taskName")[@]"
+  array=( "${!arrayname}" )
 
   tlib_debug "getting dependencies for task $taskName"
 
@@ -263,18 +262,24 @@ task() {
   tlib_register_dependency "$taskName" "$@"
 }
 
-phony() {
+tlib_generate_task() {
   local taskName taskType
   taskName="$1"
   shift
-  taskType="$(type -t $taskName)"
+  taskType="$(type -t "$taskName")"
   [[ -n "$taskType" ]] && tlib_error_exit "task($taskName) is already defined as $taskType... cannot override"
   . /dev/stdin <<EOF
 $taskName() {
-  :
+$(cat /dev/stdin)
 }
 EOF
-  task $taskName "$@"
+  task "$taskName" "$@"
+}
+
+phony() {
+  tlib_generate_task "$@" <<FUNC
+:
+FUNC
 }
 
 run_task() {
@@ -297,7 +302,6 @@ run_task() {
       tlib_debug "skipping task $task"
       echo -e "TASK: $task\\r\\t\\t\\t\\t\\t[SKIPPED]"
     else
-      tlib_debug "Changing workdir to $TLIB_CURRENT_DIR"
       pushd "$TLIB_CURRENT_DIR" > /dev/null
       dirstackdepth="${#DIRSTACK[@]}"
       echo -ne "TASK: $task\\r\\t\\t\\t\\t\\t[RUNNING]"
