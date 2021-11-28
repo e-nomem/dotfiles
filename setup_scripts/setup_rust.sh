@@ -46,7 +46,7 @@ genrate_install_rust() {
 		tlib_generate_task "update_rust_$safe_channel" update_rustup <<FUNC
 rustup update $channel --no-self-update
 FUNC
-		generate_crate_install "$channel" cargo-audit cargo-edit
+		generate_crate_install "$channel" cargo-audit cargo-edit cargo-feature
 		phony "rust_$safe_channel" "update_rust_$safe_channel" "update_crates_$safe_channel"
 		tasks+=("rust_$safe_channel")
 	done

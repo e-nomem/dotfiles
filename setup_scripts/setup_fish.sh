@@ -9,7 +9,7 @@ fi
 create_fish_dir() {
   if [[ ! -d "$HOME/.config/fish" ]]; then
 	mkdir "$HOME/.config"
-    # umask ensures proper permissions are set for the ~/.ssh directory
+    # umask ensures proper permissions are set for the ~/.config/fish directory
     # It is run in a subshell to ensure that the global umask is not modified
     (umask 0077 && mkdir "$HOME/.config/fish")
   fi
