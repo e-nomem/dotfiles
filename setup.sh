@@ -20,6 +20,7 @@ bin_exists() {
 
 . "$source_dir/setup_scripts/setup_osx.sh"
 . "$source_dir/setup_scripts/setup_homebrew.sh"
+. "$source_dir/setup_scripts/setup_nix.sh"
 . "$source_dir/setup_scripts/setup_stow.sh"
 . "$source_dir/setup_scripts/setup_git.sh"
 . "$source_dir/setup_scripts/setup_gnupg.sh"
@@ -33,4 +34,4 @@ phony all stow_all rust_all
 ## ----- Task Definitions End Here ----- ##
 
 # Go do the things
-run_task all
+run_task update_home_profile
