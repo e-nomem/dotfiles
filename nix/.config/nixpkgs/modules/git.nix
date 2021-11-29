@@ -5,6 +5,8 @@
     userName = "Eashwar Ranganathan";
     userEmail = "eashwar@eashwar.com";
 
+    extraConfig.credential.helper = "osxkeychain";
+
     signing.signByDefault = false;
     # Primary key
     signing.key = "ABE7DE99109E0751!";
