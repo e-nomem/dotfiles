@@ -7,7 +7,7 @@
 
     signing.signByDefault = false;
     # Primary key
-    signing.key = "ABE7DE99109E0751";
+    signing.key = "ABE7DE99109E0751!";
     # Secondary Key
     # signing.key = 16D3DAA87DD14FD1!
     # Tertiary Key
