@@ -5,6 +5,9 @@
     clusterctl
     direnv
     jq
+    kind
+    kubectl
+    kubernetes-helm
     mosh
     ripgrep
   ];
