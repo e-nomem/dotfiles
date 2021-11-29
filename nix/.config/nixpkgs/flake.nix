@@ -18,6 +18,7 @@
           ./modules/home-manager.nix
           ./modules/packages.nix
           ./modules/git.nix
+          ./modules/gpg.nix
         ];
       };
     };
