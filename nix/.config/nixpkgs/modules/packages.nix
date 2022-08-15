@@ -2,9 +2,13 @@
 {
   home.packages = with pkgs; [
     bazelisk
+    beancount
     clusterctl
-    deno
+    # deno
     direnv
+    fish
+    fnm
+    hub
     jq
     kind
     kubectl
@@ -12,6 +16,7 @@
     mosh
     pipenv
     pre-commit
+    protobuf
     pstree
     ripgrep
     socat
