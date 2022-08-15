@@ -14,6 +14,7 @@
     kubectl
     kubernetes-helm
     mosh
+    nushell
     pipenv
     pre-commit
     protobuf
