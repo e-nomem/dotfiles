@@ -8,6 +8,7 @@
     direnv
     fish
     fnm
+    gitRepo
     hub
     jq
     kind
@@ -22,5 +23,6 @@
     ripgrep
     socat
     step-cli
+    terraform
   ];
 }
