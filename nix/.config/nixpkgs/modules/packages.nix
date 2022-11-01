@@ -4,7 +4,7 @@
     bazelisk
     beancount
     clusterctl
-    # deno
+    deno
     direnv
     fish
     fnm
