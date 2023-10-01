@@ -4,4 +4,6 @@ if status --is-interactive
     fish_add_path -a $HOME/.cargo/bin $HOME/.krew/bin $HOME/Library/Android/sdk/tools $HOME/Library/Android/sdk/platform-tools
     set -x LSCOLORS gxfxcxdxbxegedabagacad
     source $HOME/google-cloud-sdk/path.fish.inc
+
+    abbr tailscale --position command /Applications/Tailscale.app/Contents/MacOS/Tailscale
 end

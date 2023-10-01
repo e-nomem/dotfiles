@@ -6,7 +6,6 @@
     beancount
     clusterctl
     deno
-    direnv
     fish
     fnm
     gitRepo
@@ -22,6 +21,7 @@
     protobuf
     pstree
     ripgrep
+    sccache
     socat
     step-cli
     terraform

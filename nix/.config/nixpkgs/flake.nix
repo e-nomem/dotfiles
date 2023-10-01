@@ -22,10 +22,11 @@
         homeConfigurations.eashwar = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [
-            ./modules/home-manager.nix
-            ./modules/packages.nix
+            ./modules/direnv.nix
             ./modules/git.nix
             ./modules/gpg.nix
+            ./modules/home-manager.nix
+            ./modules/packages.nix
           ];
         };
       };
