@@ -25,6 +25,7 @@
     socat
     step-cli
     terraform
+    yt-dlp
     zig
   ];
 }
