@@ -1,31 +1,29 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    _1password
-    bazelisk
+    _1password-cli
+    age-plugin-yubikey
+    apko
     beancount
-    clusterctl
-    deno
     fish
     fnm
-    gitRepo
-    hub
+    go
+    gomplate
     jq
-    kind
-    kubectl
-    kubernetes-helm
+    melange
     mosh
     nushell
     pipenv
     pre-commit
-    protobuf
     pstree
+    rage
     ripgrep
     sccache
     socat
-    step-cli
-    terraform
+#    step-cli
     yt-dlp
+    yubikey-agent
+    yubikey-manager
     zig
   ];
 }
