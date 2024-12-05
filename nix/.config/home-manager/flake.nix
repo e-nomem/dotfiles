@@ -24,7 +24,6 @@
           modules = [
             ./modules/direnv.nix
             ./modules/git.nix
-            ./modules/gpg.nix
             ./modules/home-manager.nix
             ./modules/packages.nix
           ];
