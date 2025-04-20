@@ -8,6 +8,7 @@
     fnm
     go
     gomplate
+    jujutsu
     jq
     melange
     mosh
@@ -17,6 +18,7 @@
     ripgrep
     sccache
     socat
+    uv
     yt-dlp
     yubikey-manager
     zig
